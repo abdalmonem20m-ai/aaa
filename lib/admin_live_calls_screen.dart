@@ -5,6 +5,7 @@ import 'voice_room.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'user_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:ui';
 
 class AdminLiveCallsScreen extends StatefulWidget {
   @override
@@ -33,15 +34,21 @@ class _AdminLiveCallsScreenState extends State<AdminLiveCallsScreen> {
                 builder: (context, snapshot) {
                   if (snapshot.hasData && snapshot.data!.isNotEmpty) {
                     return Container(
-                      color: Colors.amber.withOpacity(0.9),
-                      padding: EdgeInsets.all(8),
+                      margin: EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.greenAccent.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(15),
+                        border: Border.all(color: Colors.greenAccent.withOpacity(0.3)),
+                      ),
+                      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       child: Column(
                         children: snapshot.data!.map((inv) => ListTile(
-                          title: Text("دعوة من ${inv['fromName']} لمراقبة ${inv['channelTitle']}"),
+                          title: Text("دعوة من ${inv['fromName']} لمراقبة ${inv['channelTitle']}", style: TextStyle(color: Colors.white, fontSize: 14)),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               ElevatedButton(
+                                style: ElevatedButton.styleFrom(backgroundColor: Colors.greenAccent, foregroundColor: Colors.black),
                                 onPressed: () {
                                   FirebaseFirestore.instance.collection('monitoring_invitations').doc(inv['id']).update({'status': 'accepted'});
                                   _joinAsMonitor(context, inv['channelId']);
@@ -72,43 +79,55 @@ class _AdminLiveCallsScreenState extends State<AdminLiveCallsScreen> {
                       itemCount: calls.length,
                       itemBuilder: (context, index) {
                         final call = calls[index];
-                        return Card(
-                          color: Colors.white10,
-                          margin: EdgeInsets.all(10),
-                          child: ListTile(
-                            leading: Icon(Icons.record_voice_over, color: Colors.redAccent),
-                            title: Text(call['title'] ?? "غرفة علاجية", style: TextStyle(color: Colors.white)),
-                            subtitle: Text("المضيف: ${call['hostName']}", style: TextStyle(color: Colors.white70)),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon: Icon(
-                                    call['isRecording'] == true ? Icons.stop_circle : Icons.fiber_manual_record,
-                                    color: Colors.red,
+                        return Container(
+                          margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: Colors.greenAccent.withOpacity(0.1)),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(20),
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                              child: Container(
+                                color: Colors.white.withOpacity(0.05),
+                                child: ListTile(
+                                  leading: Icon(Icons.record_voice_over, color: Colors.greenAccent),
+                                  title: Text(call['title'] ?? "غرفة علاجية", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                                  subtitle: Text("المضيف: ${call['hostName']}", style: TextStyle(color: Colors.greenAccent.withOpacity(0.6))),
+                                  trailing: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      IconButton(
+                                        icon: Icon(
+                                          call['isRecording'] == true ? Icons.stop_circle : Icons.fiber_manual_record,
+                                          color: Colors.redAccent,
+                                        ),
+                                        onPressed: () => _toggleRecording(call['channelId'], call['isRecording'] ?? false),
+                                      ),
+                                      if (_monitoringChannelId == call['channelId'])
+                                        ElevatedButton(
+                                          style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+                                          onPressed: () => _leaveMonitor(context),
+                                          child: Text("خروج"),
+                                        )
+                                      else
+                                        ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: _monitoringChannelId != null ? Colors.grey : Colors.greenAccent,
+                                            foregroundColor: Colors.black,
+                                          ),
+                                          onPressed: _monitoringChannelId != null ? null : () => _joinAsMonitor(context, call['channelId']),
+                                          child: Text("دخول صامت"),
+                                        ),
+                                      IconButton(
+                                        icon: Icon(Icons.person_add, color: Colors.greenAccent),
+                                        onPressed: () => _showSummonDialog(context, call['channelId'], call['title'] ?? "مكالمة"),
+                                      ),
+                                    ],
                                   ),
-                                  onPressed: () => _toggleRecording(call['channelId'], call['isRecording'] ?? false),
                                 ),
-                                if (_monitoringChannelId == call['channelId'])
-                                  ElevatedButton(
-                                    style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
-                                    onPressed: () => _leaveMonitor(context),
-                                    child: Text("خروج"),
-                                  )
-                                else
-                                  ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: _monitoringChannelId != null ? Colors.grey : Colors.blueGrey,
-                                    ),
-                                    onPressed: _monitoringChannelId != null ? null : () => _joinAsMonitor(context, call['channelId']),
-                                    child: Text("دخول صامت"),
-                                  ),
-                                IconButton(
-                                  icon: Icon(Icons.person_add, color: Colors.amber),
-                                  onPressed: () => _showSummonDialog(context, call['channelId'], call['title'] ?? "مكالمة"),
-                                  tooltip: "استدعاء مسؤول",
-                                ),
-                              ],
+                              ),
                             ),
                           ),
                         );
@@ -167,8 +186,8 @@ class _AdminLiveCallsScreenState extends State<AdminLiveCallsScreen> {
           ).toList();
 
           return AlertDialog(
-            backgroundColor: Color(0xFF003311),
-            title: Text("استدعاء مسؤول للمراقبة", style: TextStyle(color: Colors.amber)),
+            backgroundColor: Color(0xFF001a09),
+            title: Text("استدعاء مسؤول للمراقبة", style: TextStyle(color: Colors.greenAccent)),
             content: Container(
               width: double.maxFinite,
               child: ListView.builder(

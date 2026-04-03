@@ -3,6 +3,7 @@ import 'animated_background.dart';
 import 'case_model.dart';
 import 'therapy_service.dart';
 import 'user_model.dart';
+import 'dart:ui';
 
 class AdminNewCasesScreen extends StatelessWidget {
   final TherapyService _therapyService = TherapyService();
@@ -43,15 +44,32 @@ class AdminNewCasesScreen extends StatelessWidget {
   }
 
   Widget _buildNewCaseCard(BuildContext context, HealingCase c) {
-    return Card(
-      margin: EdgeInsets.all(8),
-      color: Colors.white10,
-      child: ListTile(
-        title: Text("مريض جديد: ${c.patientId}", style: TextStyle(color: Colors.white)),
-        subtitle: Text("تاريخ التسجيل: ${c.createdAt.toString().split(' ')[0]}", style: TextStyle(color: Colors.white70)),
-        trailing: ElevatedButton(
-          onPressed: () => _showAssignDialog(context, c),
-          child: Text("إسناد للمجموعة"),
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.greenAccent.withOpacity(0.1)),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            color: Colors.white.withOpacity(0.05),
+            child: ListTile(
+              title: Text("مريض جديد: ${c.patientId}", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              subtitle: Text("تاريخ التسجيل: ${c.createdAt.toString().split(' ')[0]}", style: TextStyle(color: Colors.greenAccent.withOpacity(0.7))),
+              trailing: ElevatedButton(
+                onPressed: () => _showAssignDialog(context, c),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.greenAccent,
+                  foregroundColor: Colors.black,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                child: Text("إسناد"),
+              ),
+            ),
+          ),
         ),
       ),
     );
