@@ -97,6 +97,8 @@ class _LoginScreenState extends State<LoginScreen> {
         errorMessage = "كلمة المرور غير صحيحة";
       } else if (e.code == 'invalid-email') {
         errorMessage = "تنسيق البريد الإلكتروني غير صحيح";
+      } else if (e.code == 'operation-not-allowed') {
+        errorMessage = "تسجيل الدخول بالبريد معطل في Firebase Console";
       }
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(errorMessage)));
     } catch (e) {

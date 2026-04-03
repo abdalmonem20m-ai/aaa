@@ -26,10 +26,10 @@ class AuthService {
           'isApproved': true,
           'status': 'online',
         }, SetOptions(merge: true));
-      } else {
-        // تحديث حالة الاتصال للمستخدمين العاديين
-        updatePresence(userCredential.user!.uid, true);
       }
+      
+      // تحديث حالة الاتصال لجميع المستخدمين عند نجاح الدخول
+      updatePresence(userCredential.user!.uid, true);
       
       return userCredential;
     } on FirebaseAuthException catch (e) {
