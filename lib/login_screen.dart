@@ -25,6 +25,13 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isButtonPressed = false;
   bool _isGoogleButtonPressed = false;
 
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
   void _handleUserRedirection(AppUser userData) {
     Widget targetScreen;
     switch (userData.role) {

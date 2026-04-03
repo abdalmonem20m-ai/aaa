@@ -15,6 +15,12 @@ class _AdminCreateGroupScreenState extends State<AdminCreateGroupScreen> {
   AppUser? _selectedAssistant;
   bool _isButtonPressed = false;
 
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
+
   InputDecoration _buildNeonInput(String label) {
     return InputDecoration(
       labelText: label,

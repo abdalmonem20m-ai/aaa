@@ -18,6 +18,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _isButtonPressed = false;
   bool _isLoading = false;
 
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
   void _register() async {
     if (!_formKey.currentState!.validate()) return;
 
