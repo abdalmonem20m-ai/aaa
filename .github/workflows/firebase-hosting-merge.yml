@@ -16,7 +16,8 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: 'latest'
+          channel: 'stable'
+          cache: true
 
       - name: Install dependencies
         run: flutter pub get
@@ -31,4 +32,4 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_MMLAKA_6EA7C }}
           channelId: live
           projectId: mmlaka-6ea7c
-          entryPoint: .   # 👈 مهم جدًا
+          entryPoint: .
