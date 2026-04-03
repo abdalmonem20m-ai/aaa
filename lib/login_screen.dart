@@ -9,6 +9,7 @@ import 'healing_stories_screen.dart';
 import 'animated_background.dart';
 import 'user_model.dart';
 import 'register_screen.dart';
+import 'forgot_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -21,6 +22,8 @@ class _LoginScreenState extends State<LoginScreen> {
   final _authService = AuthService();
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
+  bool _isButtonPressed = false;
+  bool _isGoogleButtonPressed = false;
 
   void _handleUserRedirection(AppUser userData) {
     Widget targetScreen;
@@ -53,11 +56,19 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = true);
     try {
       final credential = await _authService.signInWithGoogle();
-      if (credential != null) {
+      // تأكد من أن credential و credential.user ليسا null
+      if (credential != null && credential.user != null) {
         final userData = await _authService.getUserData(credential.user!.uid);
         if (userData != null) {
           _handleUserRedirection(userData);
+        } else {
+          // هذا السيناريو يعني أن تسجيل الدخول عبر جوجل نجح، لكن بيانات المستخدم غير موجودة في Firestore
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("تم تسجيل الدخول عبر جوجل، ولكن لم يتم العثور على بيانات الصلاحيات")));
         }
+      }
+      // إذا كان credential أو credential.user null، فهذا يعني أن عملية تسجيل الدخول عبر جوجل لم تكتمل بنجاح أو تم إلغاؤها
+      else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("فشل تسجيل الدخول عبر جوجل أو تم إلغاؤه.")));
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("فشل تسجيل الدخول عبر جوجل: $e")));
@@ -108,6 +119,23 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  InputDecoration _buildNeonInput(String label) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: TextStyle(color: Colors.greenAccent.withOpacity(0.7)),
+      filled: true,
+      fillColor: Colors.white.withOpacity(0.05),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(15),
+        borderSide: BorderSide(color: Colors.greenAccent.withOpacity(0.2)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(15),
+        borderSide: BorderSide(color: Colors.greenAccent, width: 2),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -120,16 +148,19 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset('assets/images/g.jpeg', height: 180),
+                  // شعار بتوهج نيون
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [BoxShadow(color: Colors.greenAccent.withOpacity(0.2), blurRadius: 40, spreadRadius: 10)],
+                    ),
+                    child: Image.asset('assets/images/g.jpeg', height: 160),
+                  ),
                   SizedBox(height: 40),
                   TextFormField(
                     controller: _emailController,
                     style: TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      labelText: "البريد الإلكتروني",
-                      labelStyle: TextStyle(color: Colors.amber),
-                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
-                    ),
+                    decoration: _buildNeonInput("البريد الإلكتروني"),
                     validator: (v) => v!.isEmpty ? "مطلوب" : null,
                   ),
                   SizedBox(height: 20),
@@ -137,37 +168,77 @@ class _LoginScreenState extends State<LoginScreen> {
                     controller: _passwordController,
                     obscureText: true,
                     style: TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      labelText: "كلمة المرور",
-                      labelStyle: TextStyle(color: Colors.amber),
-                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
-                    ),
+                    decoration: _buildNeonInput("كلمة المرور"),
                     validator: (v) => v!.length < 6 ? "كلمة المرور قصيرة" : null,
+                  ),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => ForgotPasswordScreen()),
+                      ),
+                      child: Text("نسيت كلمة المرور؟", style: TextStyle(color: Colors.amber, fontSize: 14)),
+                    ),
                   ),
                   SizedBox(height: 40),
                   _isLoading 
                     ? CircularProgressIndicator(color: Colors.amber)
-                    : ElevatedButton(
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) _login();
-                        },
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: Size(double.infinity, 50),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    : GestureDetector(
+                        onTapDown: (_) => setState(() => _isButtonPressed = true),
+                        onTapUp: (_) => setState(() => _isButtonPressed = false),
+                        onTapCancel: () => setState(() => _isButtonPressed = false),
+                        child: AnimatedScale(
+                          scale: _isButtonPressed ? 0.95 : 1.0,
+                          duration: Duration(milliseconds: 100),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(15),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.greenAccent.withOpacity(0.4),
+                                  offset: Offset(0, 4),
+                                  blurRadius: 15,
+                                ),
+                              ],
+                            ),
+                            child: ElevatedButton(
+                              onPressed: () {
+                                if (_formKey.currentState!.validate()) _login();
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.greenAccent,
+                                foregroundColor: Colors.black,
+                                minimumSize: Size(double.infinity, 55),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                elevation: 0,
+                              ),
+                              child: Text("تسجيل الدخول", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                            ),
+                          ),
                         ),
-                        child: Text("تسجيل الدخول", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                       ),
                   SizedBox(height: 10),
                   _isLoading 
                     ? SizedBox.shrink()
-                    : OutlinedButton.icon(
-                        onPressed: _signInWithGoogle,
-                        style: OutlinedButton.styleFrom(
-                          minimumSize: Size(double.infinity, 50),
-                          side: BorderSide(color: Colors.white30),
+                    : GestureDetector(
+                        onTapDown: (_) => setState(() => _isGoogleButtonPressed = true),
+                        onTapUp: (_) => setState(() => _isGoogleButtonPressed = false),
+                        onTapCancel: () => setState(() => _isGoogleButtonPressed = false),
+                        child: AnimatedScale(
+                          scale: _isGoogleButtonPressed ? 0.95 : 1.0,
+                          duration: Duration(milliseconds: 100),
+                          child: OutlinedButton.icon(
+                            onPressed: _signInWithGoogle,
+                            style: OutlinedButton.styleFrom(
+                              minimumSize: Size(double.infinity, 50),
+                              side: BorderSide(color: Colors.greenAccent.withOpacity(0.5)),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                            ),
+                            icon: Icon(Icons.login, color: Colors.greenAccent),
+                            label: Text("تسجيل الدخول بواسطة Google", style: TextStyle(color: Colors.white)),
+                          ),
                         ),
-                        icon: Icon(Icons.login, color: Colors.white),
-                        label: Text("تسجيل الدخول بواسطة Google", style: TextStyle(color: Colors.white)),
                       ),
                   TextButton(
                     onPressed: () => Navigator.push(

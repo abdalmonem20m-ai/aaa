@@ -87,6 +87,13 @@ class AuthService {
 
       UserCredential userCredential = await _auth.signInWithCredential(credential);
       
+      // إضافة فحص للتأكد من أن كائن المستخدم ليس null بعد تسجيل الدخول
+      if (userCredential.user == null) {
+        print("Google Sign-In Error: User object is null after successful credential sign-in.");
+        // يمكن أن يحدث هذا إذا تم إلغاء العملية أو حدث خطأ غير متوقع
+        return null; 
+      }
+      
       // التحقق من وجود بيانات المستخدم في Firestore
       DocumentSnapshot doc = await _db.collection('users').doc(userCredential.user!.uid).get();
       if (!doc.exists) {
@@ -133,6 +140,15 @@ class AuthService {
       });
     } catch (e) {
       print("Error creating admin invitation: $e");
+      rethrow;
+    }
+  }
+
+  // إعادة تعيين كلمة المرور
+  Future<void> resetPassword(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+    } catch (e) {
       rethrow;
     }
   }

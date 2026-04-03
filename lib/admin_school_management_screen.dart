@@ -4,6 +4,7 @@ import 'school_service.dart';
 import 'therapy_service.dart';
 import 'user_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:ui';
 
 class AdminSchoolManagementScreen extends StatelessWidget {
   final SchoolService _schoolService = SchoolService();
@@ -31,12 +32,22 @@ class AdminSchoolManagementScreen extends StatelessWidget {
                       itemCount: studentsWaiting.length,
                       itemBuilder: (context, index) {
                         final student = studentsWaiting[index];
-                        return Card(
-                          color: Colors.white10,
+                        return Container(
                           margin: EdgeInsets.all(10),
-                          child: ListTile(
-                            title: Text(student.name, style: TextStyle(color: Colors.white)),
-                            subtitle: Text("أنهى المستوى: ${student.studentLevel}", style: TextStyle(color: Colors.amber)),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: Colors.greenAccent.withOpacity(0.2)),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(20),
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                              child: Container(
+                                color: Colors.white.withOpacity(0.05),
+                                padding: EdgeInsets.symmetric(vertical: 8),
+                                child: ListTile(
+                                  title: Text(student.name, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                                  subtitle: Text("أنهى المستوى: ${student.studentLevel}", style: TextStyle(color: Colors.greenAccent)),
                             trailing: Wrap(
                               spacing: 8,
                               children: [
@@ -57,6 +68,9 @@ class AdminSchoolManagementScreen extends StatelessWidget {
                                   child: Text("راسب"),
                                 ),
                               ],
+                            ),
+                          ),
+                              ),
                             ),
                           ),
                         );

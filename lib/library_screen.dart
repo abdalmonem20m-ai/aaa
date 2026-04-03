@@ -5,6 +5,7 @@ import 'therapy_service.dart';
 import 'voice_room.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'therapist_chats_screen.dart';
+import 'dart:ui';
 
 class LibraryScreen extends StatefulWidget {
   @override
@@ -45,6 +46,9 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     ),
                   ],
                   bottom: TabBar(
+                    indicatorColor: Colors.greenAccent,
+                    labelColor: Colors.greenAccent,
+                    unselectedLabelColor: Colors.white54,
                     tabs: [
                       Tab(icon: Icon(Icons.audiotrack), text: "صوتيات"),
                       Tab(icon: Icon(Icons.description), text: "رقية مكتوبة"),
@@ -102,30 +106,40 @@ class _LibraryScreenState extends State<LibraryScreen> {
           itemCount: items.length,
           itemBuilder: (context, index) {
             final item = items[index];
-            return Card(
-              margin: EdgeInsets.all(8),
-              color: Colors.white10,
-              child: ListTile(
-                title: Text(item.title, style: TextStyle(color: Colors.white)),
-                subtitle: Text(type == LibraryItemType.audio ? "مقطع صوتي" : "نص رقية", 
-                          style: TextStyle(color: Colors.white54)),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // زر الإرسال للمريض
-                    IconButton(
-                      icon: Icon(Icons.send, color: Colors.amber),
-                      onPressed: () => _showChatSelection(context, item),
-                      tooltip: "إرسال لمريض",
-                    ),
-                    // زر التشغيل في الغرفة الصوتية (للصوتيات فقط)
-                    if (type == LibraryItemType.audio)
-                      IconButton(
-                        icon: Icon(Icons.play_circle_fill, color: Colors.greenAccent),
-                        onPressed: () => _voiceRoom.playHealingAudio(item.content),
-                        tooltip: "تشغيل في الغرفة",
+            return Container(
+              margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.greenAccent.withOpacity(0.1)),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                  child: Container(
+                    color: Colors.white.withOpacity(0.05),
+                    child: ListTile(
+                      title: Text(item.title, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      subtitle: Text(type == LibraryItemType.audio ? "مقطع صوتي" : "نص رقية", 
+                                style: TextStyle(color: Colors.greenAccent.withOpacity(0.7))),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.send, color: Colors.greenAccent),
+                            onPressed: () => _showChatSelection(context, item),
+                            tooltip: "إرسال لمريض",
+                          ),
+                          if (type == LibraryItemType.audio)
+                            IconButton(
+                              icon: Icon(Icons.play_circle_fill, color: Colors.greenAccent),
+                              onPressed: () => _voiceRoom.playHealingAudio(item.content),
+                              tooltip: "تشغيل في الغرفة",
+                            ),
+                        ],
                       ),
-                  ],
+                    ),
+                  ),
                 ),
               ),
             );

@@ -8,12 +8,12 @@ class AppBackground extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+        gradient: RadialGradient(
+          center: Alignment.center,
+          radius: 1.5,
           colors: [
-            Color(0xFF003311), // أخضر داكن جداً
-            Color(0xFF004d1a), // أخضر ملكي
+            Color(0xFF001a09), // قلب أخضر عميق
+            Color(0xFF000000), // أسود مطلق للأطراف
           ],
         ),
       ),

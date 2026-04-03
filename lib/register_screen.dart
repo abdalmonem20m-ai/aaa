@@ -15,6 +15,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _passwordController = TextEditingController();
   final _authService = AuthService();
   UserRole _selectedRole = UserRole.student;
+  bool _isButtonPressed = false;
   bool _isLoading = false;
 
   void _register() async {
@@ -50,25 +51,35 @@ class _RegisterScreenState extends State<RegisterScreen> {
               key: _formKey,
               child: Column(
                 children: [
-                  Text("إنشاء حساب جديد", style: TextStyle(color: Colors.amber, fontSize: 24, fontWeight: FontWeight.bold)),
+                  Text(
+                    "إنشاء حساب جديد",
+                    style: TextStyle(
+                      color: Colors.greenAccent,
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      shadows: [Shadow(color: Colors.greenAccent, blurRadius: 20)], // توهج نيون
+                    ),
+                  ),
                   SizedBox(height: 30),
                   TextFormField(
                     controller: _nameController,
                     style: TextStyle(color: Colors.white),
-                    decoration: InputDecoration(labelText: "الاسم الكامل", labelStyle: TextStyle(color: Colors.white70)),
+                    decoration: _buildNeonInput("الاسم الكامل"),
                     validator: (v) => v!.isEmpty ? "هذا الحقل مطلوب" : null,
                   ),
+                  SizedBox(height: 15),
                   TextFormField(
                     controller: _emailController,
                     style: TextStyle(color: Colors.white),
-                    decoration: InputDecoration(labelText: "البريد الإلكتروني", labelStyle: TextStyle(color: Colors.white70)),
+                    decoration: _buildNeonInput("البريد الإلكتروني"),
                     validator: (v) => v!.contains('@') ? null : "بريد إلكتروني غير صحيح",
                   ),
+                  SizedBox(height: 15),
                   TextFormField(
                     controller: _passwordController,
                     obscureText: true,
                     style: TextStyle(color: Colors.white),
-                    decoration: InputDecoration(labelText: "كلمة المرور", labelStyle: TextStyle(color: Colors.white70)),
+                    decoration: _buildNeonInput("كلمة المرور"),
                     validator: (v) => v!.length < 6 ? "كلمة المرور ضعيفة" : null,
                   ),
                   SizedBox(height: 20),
@@ -87,12 +98,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   SizedBox(height: 40),
                   _isLoading
                       ? CircularProgressIndicator(color: Colors.amber)
-                      : ElevatedButton(
-                          onPressed: _register,
-                          style: ElevatedButton.styleFrom(
-                            minimumSize: Size(double.infinity, 50),
+                      : Container(
+                          decoration: BoxDecoration(
+                            boxShadow: [
+                              BoxShadow(color: Colors.greenAccent.withOpacity(0.3), blurRadius: 20, offset: Offset(0, 5))
+                            ],
                           ),
-                          child: Text("إنشاء الحساب"),
+                          child: ElevatedButton(
+                            onPressed: _register,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.greenAccent,
+                              foregroundColor: Colors.black,
+                              minimumSize: Size(double.infinity, 55),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                            ),
+                            child: Text("إنشاء الحساب", style: TextStyle(fontWeight: FontWeight.bold)),
+                          ),
                         ),
                   TextButton(
                     onPressed: () => Navigator.pop(context),
@@ -103,6 +124,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  InputDecoration _buildNeonInput(String label) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: TextStyle(color: Colors.greenAccent.withOpacity(0.7)),
+      filled: true,
+      fillColor: Colors.white.withOpacity(0.05),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(15),
+        borderSide: BorderSide(color: Colors.greenAccent.withOpacity(0.2)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(15),
+        borderSide: BorderSide(color: Colors.greenAccent, width: 2),
       ),
     );
   }
