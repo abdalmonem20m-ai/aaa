@@ -14,6 +14,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   bool _isLoading = false;
   bool _isButtonPressed = false;
 
+  @override
+  void dispose() {
+    // تصحيح: يجب دائماً التخلص من المتحكم لتجنب تسريب الذاكرة
+    _emailController.dispose();
+    super.dispose();
+  }
+
   void _resetPassword() async {
     if (!_formKey.currentState!.validate()) return;
 

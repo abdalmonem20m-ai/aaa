@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'animated_background.dart';
 import 'school_service.dart';
